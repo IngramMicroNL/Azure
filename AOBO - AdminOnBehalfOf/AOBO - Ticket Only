@@ -1,4 +1,4 @@
-#AOBO - PEC Only
+#AOBO - Ticket Only
 #Create temporary placeholder management group to activate Management Group functionality
 
 $All_Subs = Get-AzSubscription
