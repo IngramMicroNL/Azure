@@ -26,6 +26,7 @@ if ($ErrorCheck -ne $null) {
   Write-Output "Error detected - please verify if the current user is Global Administrator and chapter 1 has been completed. Please run the script again. If errors persist: sign out and sign back into the Azure portal."
   Pause
   Exit
+}
 
 $MGList = Get-AzManagementGroup -ErrorAction SilentlyContinue        
 $ErrorCheck = $null
