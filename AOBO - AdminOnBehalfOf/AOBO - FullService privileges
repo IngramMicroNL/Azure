@@ -18,24 +18,21 @@ foreach ($Sub in $All_Subs) {
 Start-Sleep 5
 $ErrorCheck = $null
 
-New-AzManagementGroup -GroupId "Placeholder_To_Be_Removed" -ErrorVariable ErrorCheck
-Start-Sleep 2
-
-if ($ErrorCheck -ne $null) { 
-  Write-Output "`n `n `n `n `n `n `n" 
-  Write-Output "Error detected - please verify if the current user is Global Administrator and chapter 1 has been completed. Please run the script again. If errors persist: sign out and sign back into the Azure portal."
-  Pause
-  Exit
-}
-
-Remove-AzManagementGroup -GroupId "Placeholder_To_Be_Removed" 
-Start-Sleep 2
-
-$MGList = Get-AzManagementGroup        
+$MGList = Get-AzManagementGroup -ErrorAction SilentlyContinue        
 $ErrorCheck = $null
 
 foreach ($MG in $MGList) { 
   $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Owner" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction SilentlyContinue
+}
+
+foreach ($Sub in $All_Subs) {
+    Set-AzContext -Subscription $Sub
+    $Sub_Id = $Sub.Id
+    $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id"
+    if ($RBACCheck -eq $null) {
+        New-AzRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id" -ErrorAction SilentlyContinue -ErrorVariable ErrorCheck
+    }
+    $Sub_Id = $null
 }
 
 $ErrorCheck = $null 
