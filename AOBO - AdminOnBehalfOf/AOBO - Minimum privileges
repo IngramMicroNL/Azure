@@ -55,4 +55,67 @@ if ($ErrorCheck -notmatch "Conflict" -and $ErrorCheck -ne $null) {
   Partner for further analysis."
 }
 #
+
+
+
+
+
+
+#AOBO - Full Service privilege4555555555555555555555555555555555555555555555555555555555555555555
+
+$All_Subs = Get-AzSubscription
+$CurrentUser = Get-AzADUser -signedIn
+$CurrentUserId = $CurrentUser.Id
+
+foreach ($Sub in $All_Subs) {
+    Set-AzContext -Subscription $Sub
+    $Sub_Id = $Sub.Id
+    $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id"
+    if ($RBACCheck -eq $null) {
+        New-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id" -ErrorAction SilentlyContinue
+    }
+    $Sub_Id = $null
+}
+
+Start-Sleep 5
+$ErrorCheck = $null
+
+$MGList = Get-AzManagementGroup -ErrorAction SilentlyContinue        
+$ErrorCheck = $null
+
+foreach ($MG in $MGList) { 
+  $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Support Request Contributor" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+  $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Reader" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+  $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Quota Request Operator" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+}
+
+foreach ($Sub in $All_Subs) {
+    Set-AzContext -Subscription $Sub
+    $Sub_Id = $Sub.Id
+    $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id"
+    if ($RBACCheck -eq $null) {
+        $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Support Request Contributor" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+        $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Reader" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+        $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Quota Request Operator" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction silentlycontinue 
+    }
+}
+    $Sub_Id = $null
+}
+
+$ErrorCheck = $null 
+if ($ErrorCheck -match "Conflict" -or $ErrorCheck -eq $null) { 
+  Write-Output "`n `n `n `n `n `n `n" 
+  Write-Output "Deployment was succesful, please contact your known contact at Ingram Micro or your 
+  IT Partner to inform them. Cloud Shell may be closed now." 
+  Pause 
+  Exit 
+} 
+if ($ErrorCheck -notmatch "Conflict" -and $ErrorCheck -ne $null) { 
+  Write-Output "`n `n `n `n `n `n `n" 
+  Write-Output $ErrorCheck 
+  Write-Output "Errors were found, please contact your known contact at Ingram Micro or your IT 
+  Partner for further analysis."
+}
+#
+#End
 #End
