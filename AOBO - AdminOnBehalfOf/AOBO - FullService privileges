@@ -4,6 +4,8 @@ $All_Subs = Get-AzSubscription
 $CurrentUser = Get-AzADUser -signedIn
 $CurrentUserId = $CurrentUser.Id
 
+$Roles = "Owner"
+
 foreach ($Sub in $All_Subs) {
     Set-AzContext -Subscription $Sub
     $Sub_Id = $Sub.Id
@@ -20,16 +22,24 @@ $ErrorCheck = $null
 $MGList = Get-AzManagementGroup -ErrorAction SilentlyContinue        
 $ErrorCheck = $null
 
-foreach ($MG in $MGList) { 
-  $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName "Owner" -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction SilentlyContinue
+foreach ($MG in $MGList) {
+    foreach ($Role in $Roles) {
+        $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName $Role -Scope $MG.Id
+        if ($RBACCheck -eq $null) {
+            $HideOutput = New-AZRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName $Role -Scope $MG.Id -ErrorVariable ErrorCheck -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 foreach ($Sub in $All_Subs) {
     Set-AzContext -Subscription $Sub
     $Sub_Id = $Sub.Id
-    $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id"
-    if ($RBACCheck -eq $null) {
-        New-AzRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -RoleDefinitionName "Owner" -Scope "/subscriptions/$Sub_Id" -ErrorAction SilentlyContinue -ErrorVariable ErrorCheck
+    
+    foreach ($Role in $Roles) {
+        $RBACCheck = Get-AzRoleAssignment -ObjectId $CurrentUserId -RoleDefinitionName $Role -Scope "/subscriptions/$Sub_Id"
+        if ($RBACCheck -eq $null) {
+            $HideOutput = New-AzRoleAssignment -ObjectId "34c4dd11-78c0-41e5-8370-c6dbf16bc3e9" -ObjectType "ForeignGroup" -RoleDefinitionName $Role -Scope "/subscriptions/$Sub_Id" -ErrorAction SilentlyContinue -ErrorVariable ErrorCheck
+        }
     }
     $Sub_Id = $null
 }
