@@ -1,5 +1,4 @@
 #AOBO - Full Service privileges
-#Create temporary placeholder management group to activate Management Group functionality
 
 $All_Subs = Get-AzSubscription
 $CurrentUser = Get-AzADUser -signedIn
