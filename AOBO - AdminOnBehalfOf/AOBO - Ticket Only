@@ -1,6 +1,6 @@
 #AOBO - Ticket Only
 
-$All_Subs = Get-AzSubscription
+$All_Subs = Get-AzSubscription | Where-Object { $_.State -eq "Enabled" }
 $CurrentUser = Get-AzADUser -signedIn
 $CurrentUserId = $CurrentUser.Id
 
